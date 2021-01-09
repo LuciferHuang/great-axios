@@ -1,0 +1,38 @@
+{
+  "name": "great-axios",
+  "version": "1.0.3",
+  "description": "Based on Axios, HTTP library that can be used for browsers and node. Support jsonp request and Axios configuration and Axios function, it is more convenient to cancel the request.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "shortid": "^2.2.16"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.20",
+    "typescript": "^3.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hlianfa/great-axios.git"
+  },
+  "keywords": [
+    "Axios",
+    "HTTP",
+    "Get",
+    "Post",
+    "Jsonp",
+    "Great",
+    "Cancel",
+    "Request",
+    "Timeout"
+  ],
+  "author": "Hlianfa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hlianfa/great-axios/issues"
+  },
+  "homepage": "https://github.com/Hlianfa/great-axios#readme"
+}
