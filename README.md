@@ -19,6 +19,7 @@ npm install great-axios --save
 Here have some examples, hopefully could give you an idea of how to use it:
 
 ```typescript
+// GreatAxiosInstance
 const greatAxios = new GreatAxios({
   reqOptions: {
     ignoreStatus: true, // onyly return serverdatas, default true
@@ -31,7 +32,10 @@ const greatAxios = new GreatAxios({
     headers: { "X-Requested-With": "XMLHttpRequest" },
   },
 });
+```
 
+```typescript
+// interceptor
 const interceptor = greatAxios.interceptors4Request((config) => {
   config.withCredentials = false;
 });
@@ -44,7 +48,9 @@ greatAxios.removeInterceptor(interceptor);
 greatAxios.interceptors4Response((rsp) => {
   // do someting with response
 });
+```
 
+```typescript
 // greatAxios.jsonp(url[,config])
 greatAxios
   .jsonp("//xxx/example?param=test", {
@@ -60,7 +66,9 @@ greatAxios
       // jspnp request failed
     }
   });
+```
 
+```typescript
 // greatAxios.get(url[,config])
 greatAxios
   .get("/example?param=test", {
@@ -79,8 +87,10 @@ greatAxios
   .catch((error) => {
     // get request failed
   });
+```
 
-let cancelID = "";
+```typescript
+let postCancelID = "";
 
 // greatAxios.post(url[, data[, config]])
 greatAxios
@@ -94,7 +104,7 @@ greatAxios
         ignoreStatus: false,
       },
       getInnerAttributes: (config) => {
-        cancelID = config.cancelId; // used to cancel this request
+        postCancelID = config.cancelId; // used to cancel this request
         // config.axiosInstance // you can also get an axios instance
       },
     }
@@ -107,9 +117,11 @@ greatAxios
       // post request failed
     }
   });
+```
 
+```typescript
 // if you want to cancel a pending request
-greatAxios.cancel(cancelID);
+greatAxios.cancel(postCancelID);
 ```
 
 ## License
@@ -119,3 +131,4 @@ greatAxios.cancel(cancelID);
 1. commit first version --2021/01/10 [HLianfa](https://github.com/Hlianfa)
 2. reduce redundancy --2021/01/10 [HLianfa](https://github.com/Hlianfa)
 3. add LICENSE --2021/01/10 [HLianfa](https://github.com/Hlianfa)
+4. compiled into js --2021/01/19 [HLianfa](https://github.com/Hlianfa)

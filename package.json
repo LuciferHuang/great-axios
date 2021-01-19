@@ -1,8 +1,8 @@
 {
   "name": "great-axios",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Based on Axios, HTTP library that can be used for browsers and node. Support jsonp request and Axios configuration and Axios function, it is more convenient to cancel the request.",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
