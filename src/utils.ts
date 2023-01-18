@@ -1,12 +1,11 @@
-import { GreatAxiosConfig, GreatAxiosError } from "../libs/typings";
+import { GreatAxiosConfig, GreatAxiosError } from './types';
 
 /**
  * 配置项深拷贝
- * @param {any} obj - 配置对象
+ * @param obj - 配置对象
  * @return {GreatAxiosConfig}
-*/
-export function configDeepCopy(obj: any): GreatAxiosConfig {
-
+ */
+export function configDeepCopy(obj): GreatAxiosConfig {
   const ignoreTypes = ['undefined', 'null'];
 
   // 直接返回值
@@ -17,7 +16,7 @@ export function configDeepCopy(obj: any): GreatAxiosConfig {
 
   Object.keys(obj).forEach((key) => {
     // 防止遍历时,拷贝到__proto__的可见属性
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const val = obj[key];
       newObj[key] = typeof val === 'object' ? configDeepCopy(val) : val;
     }
@@ -29,10 +28,10 @@ export function configDeepCopy(obj: any): GreatAxiosConfig {
 /**
  * @param {string} errorKey - 键名
  * @param {string} msg
- * @param {any} error
+ * @param error
  * @return {GreatAxiosError}
-*/
-export function getError(errorKey: string, msg: string = 'error', error?: any): GreatAxiosError {
+ */
+export function getError(errorKey: string, msg = 'error', error?): GreatAxiosError {
   let defaultError = {
     message: msg,
     name: 'error',

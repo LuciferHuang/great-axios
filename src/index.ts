@@ -1,27 +1,30 @@
 import axios, { AxiosStatic, Canceler } from 'axios';
-import { defaultOptions } from '../libs/defaults';
-import { GreatAxiosConfig, GreatAxiosReqOption, ResponseHandle, BeforeSend, ErrorHandle } from '../libs/typings';
+import { GreatAxiosConfig, GreatAxiosReqOption, ResponseHandle, BeforeSend, ErrorHandle } from './types';
 import { responseParse } from './response';
 import { errorParse } from './error';
 import { configDeepCopy } from './utils';
+import shortid from 'shortid';
 
 class GreatAxios {
-
   public axiosInstance: AxiosStatic;
 
-  // defaults
-  private options: GreatAxiosReqOption;
+  private readonly options: GreatAxiosReqOption;
 
-  private shortidInstance: any;
-  private cancelTokenMap: Map<string, Canceler>;
+  private readonly cancelTokenMap: Map<string, Canceler>;
 
   constructor(defaults?: GreatAxiosConfig) {
     const { reqConfig = {}, reqOptions } = configDeepCopy(defaults) || {};
-    this.options = { ...defaultOptions, ...reqOptions };
+    this.options = {
+      ...{
+        ignoreStatus: true,
+        errorKey: 'code',
+        jsonpTimeout: 3000,
+        catchError: false
+      },
+      ...reqOptions
+    };
 
     this.cancelTokenMap = new Map();
-
-    this.shortidInstance = require('shortid'); // can not use import, fine -_-
 
     this.axiosInstance = axios;
     this.axiosInstance.defaults = reqConfig;
@@ -32,37 +35,40 @@ class GreatAxios {
    * @param {BeforeSend} beforeSend - 发起请求前的回调
    * @param {ErrorHandle} errorHandle - 请求错误的回调
    * @return {number}
-  */
+   */
   public interceptors4Request(beforeSend: BeforeSend, errorHandle?: ErrorHandle): number {
     return this.interceptorsHandle('request', beforeSend, errorHandle);
   }
-  
+
   /**
    * 响应拦截器
    * @param {ResponseHandle} ResponseHandle - 请求成功的回调
    * @param {ErrorHandle} errorHandle - 请求错误的回调
    * @return {number}
-  */
+   */
   public interceptors4Response(responseHandle: ResponseHandle, errorHandle?: ErrorHandle): number {
     return this.interceptorsHandle('response', responseHandle, errorHandle);
   }
 
   private interceptorsHandle(type: string, firstHandle: any, secodeHandle?: ErrorHandle): number {
-    return this.axiosInstance.interceptors[type].use((val: any) => {
-      firstHandle(val);
-      return val;
-    }, (error: any) => {
-      if (typeof secodeHandle === 'function') {
-        secodeHandle(error);
+    return this.axiosInstance.interceptors[type].use(
+      (val: any) => {
+        firstHandle(val);
+        return val;
+      },
+      (error: any) => {
+        if (typeof secodeHandle === 'function') {
+          secodeHandle(error);
+        }
+        return Promise.reject(error);
       }
-      return Promise.reject(error);
-    });
+    );
   }
 
   /**
    * 移除拦截器
    * @param {number} interceptor
-  */
+   */
   public removeInterceptor(interceptor: number): void {
     if (!interceptor) {
       console.error('require interceptor number');
@@ -76,11 +82,11 @@ class GreatAxios {
    * @param {string} url - 接口地址
    * @param {GreatAxiosConfig} config - （可选）请求配置
    * @return {Promise<any>}
-  */
+   */
   public jsonp(url: string, config?: GreatAxiosConfig): Promise<any> {
     return new Promise((resolve, reject) => {
       const { reqOptions = {} } = configDeepCopy(config) || {};
-      const localOptions = { ...this.options, ...reqOptions};
+      const localOptions = { ...this.options, ...reqOptions };
       const { jsonpTimeout = 5000 } = localOptions;
 
       if (typeof process !== 'undefined') {
@@ -89,7 +95,7 @@ class GreatAxios {
         return;
       }
 
-      const callbackName = `_jsp${(new Date()).getTime()}${Math.round(Math.random() * 1000)}`;
+      const callbackName = `_jsp${new Date().getTime()}${Math.round(Math.random() * 1000)}`;
       const JSONP = document.createElement('script');
       JSONP.type = 'text/javascript';
       JSONP.src = `${url}&callback=${callbackName}`;
@@ -106,13 +112,19 @@ class GreatAxios {
       setTimeout(() => {
         if (!isSuccess) {
           const errorMsg = 'request timeout';
-          errorParse(localOptions, resolve, reject, {
-            response: {
-              data: null,
-              status: 408
+          errorParse(
+            localOptions,
+            resolve,
+            reject,
+            {
+              response: {
+                data: null,
+                status: 408
+              },
+              message: errorMsg
             },
-            message: errorMsg,
-          }, errorMsg);
+            errorMsg
+          );
         }
       }, jsonpTimeout);
     });
@@ -123,31 +135,33 @@ class GreatAxios {
    * @param {string} url - 接口地址
    * @param {GreatAxiosConfig} config - （可选）请求配置
    * @return {Promise<any>}
-  */
+   */
   public get(url: string, config?: GreatAxiosConfig): Promise<any> {
     const { reqConfig, reqOptions = {}, getInnerAttributes } = configDeepCopy(config) || {};
-    const localOptions = { ...this.options, ...reqOptions};
+    const localOptions = { ...this.options, ...reqOptions };
     return new Promise((resolve, reject) => {
-
-      const cancelId = this.shortidInstance.generate();
+      const cancelId = shortid.generate();
       const CancelToken = this.axiosInstance.CancelToken;
-  
-      this.axiosInstance.get(url, {
-        cancelToken: new CancelToken((canceler: Canceler) => {
-          this.cancelTokenMap.set(cancelId, canceler);
-          if (typeof getInnerAttributes === 'function') {
-            getInnerAttributes({
-              cancelId,
-              axiosInstance: this.axiosInstance,
-            });
-          }
-        }),
-        ...reqConfig
-      }).then((rsp: any) => {
-        responseParse(rsp, localOptions, resolve, reject);
-      }).catch((err: any) => {
-        errorParse(localOptions, resolve, reject, err);
-      });
+
+      this.axiosInstance
+        .get(url, {
+          cancelToken: new CancelToken((canceler: Canceler) => {
+            this.cancelTokenMap.set(cancelId, canceler);
+            if (typeof getInnerAttributes === 'function') {
+              getInnerAttributes({
+                cancelId,
+                axiosInstance: this.axiosInstance
+              });
+            }
+          }),
+          ...reqConfig
+        })
+        .then((rsp: any) => {
+          responseParse(rsp, localOptions, resolve, reject);
+        })
+        .catch((err: any) => {
+          errorParse(localOptions, resolve, reject, err);
+        });
     });
   }
 
@@ -157,38 +171,40 @@ class GreatAxios {
    * @param {any} data - （可选）post参数
    * @param {GreatAxiosConfig} config - （可选）请求配置
    * @return {Promise<any>}
-  */
+   */
   public post(url: string, data?: any, config?: GreatAxiosConfig): Promise<any> {
     const { reqConfig, reqOptions = {}, getInnerAttributes } = configDeepCopy(config) || {};
-    const localOptions = { ...this.options, ...reqOptions};
+    const localOptions = { ...this.options, ...reqOptions };
     return new Promise((resolve, reject) => {
-
-      const cancelId = this.shortidInstance.generate();
+      const cancelId = shortid.generate();
       const CancelToken = this.axiosInstance.CancelToken;
 
-      this.axiosInstance.post(url, data, {
-        cancelToken: new CancelToken(canceler => {
-          this.cancelTokenMap.set(cancelId, canceler);
-          if (typeof getInnerAttributes === 'function') {
-            getInnerAttributes({
-              cancelId,
-              axiosInstance: this.axiosInstance,
-            });
-          }
-        }),
-        ...reqConfig
-      }).then(rsp => {
-        responseParse(rsp, localOptions, resolve, reject);
-      }).catch(err => {
-        errorParse(localOptions, resolve, reject, err);
-      })
+      this.axiosInstance
+        .post(url, data, {
+          cancelToken: new CancelToken((canceler) => {
+            this.cancelTokenMap.set(cancelId, canceler);
+            if (typeof getInnerAttributes === 'function') {
+              getInnerAttributes({
+                cancelId,
+                axiosInstance: this.axiosInstance
+              });
+            }
+          }),
+          ...reqConfig
+        })
+        .then((rsp) => {
+          responseParse(rsp, localOptions, resolve, reject);
+        })
+        .catch((err) => {
+          errorParse(localOptions, resolve, reject, err);
+        });
     });
   }
 
   /**
    * 中断请求
    * @param {string} cancelId - 请求id
-  */
+   */
   public cancel(cancelId: string): void {
     if (!this.cancelTokenMap.has(cancelId)) {
       return;

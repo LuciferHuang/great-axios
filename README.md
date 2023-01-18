@@ -126,9 +126,3 @@ greatAxios.cancel(postCancelID);
 
 ## License
 [MIT](./LICENSE)
-
-## ChangeLog
-1. commit first version --2021/01/10 [HLianfa](https://github.com/Hlianfa)
-2. reduce redundancy --2021/01/10 [HLianfa](https://github.com/Hlianfa)
-3. add LICENSE --2021/01/10 [HLianfa](https://github.com/Hlianfa)
-4. compiled into js --2021/01/19 [HLianfa](https://github.com/Hlianfa)

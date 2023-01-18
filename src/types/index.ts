@@ -5,13 +5,13 @@ interface GreatAxiosPublicAttributes {
   axiosInstance: AxiosStatic;
 }
 
-type GetInnerAttributes = (attributes: GreatAxiosPublicAttributes) => void
+type GetInnerAttributes = (attributes: GreatAxiosPublicAttributes) => void;
 
-export type resolve = (value: unknown) => void
-export type reject = (reason?: any) => void
-export type BeforeSend = (config: AxiosRequestConfig) => void
-export type ResponseHandle = (rsp: AxiosResponse<any>) => void
-export type ErrorHandle = (err: any) => void
+export type resolve = (value: unknown) => void;
+export type reject = (reason?: any) => void;
+export type BeforeSend = (config: AxiosRequestConfig) => void;
+export type ResponseHandle = (rsp: AxiosResponse<any>) => void;
+export type ErrorHandle = (err: any) => void;
 
 export interface GreatAxiosReqOption {
   ignoreStatus?: boolean;
@@ -27,7 +27,7 @@ export interface GreatAxiosConfig {
 }
 
 export interface GreatAxiosError {
-  [x: string]: number | string | AxiosError,
+  [x: string]: number | string | AxiosError;
   error: AxiosError;
   msg: string;
 }

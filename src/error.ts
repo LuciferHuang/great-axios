@@ -1,14 +1,14 @@
-import { GreatAxiosReqOption, resolve, reject } from "../libs/typings";
-import { getError } from "./utils";
+import { GreatAxiosReqOption, resolve, reject } from './types';
+import { getError } from './utils';
 
 /**
-* 错误处理
-* @param {any} err
-* @param {GreatAxiosReqOption} options - GreatAxiosReqOption
-* @param {resolve} resolve - resolve
-* @param {reject} reject - reject
-*/
-export function errorParse(options: GreatAxiosReqOption, resolve: resolve, reject: reject, err?: any, msg?: string): void {
+ * 错误处理
+ * @param err
+ * @param {GreatAxiosReqOption} options - GreatAxiosReqOption
+ * @param {resolve} resolve - resolve
+ * @param {reject} reject - reject
+ */
+export function errorParse(options: GreatAxiosReqOption, resolve: resolve, reject: reject, err?, msg?: string): void {
   const { ignoreStatus, errorKey, catchError } = options;
   let error = err;
   if (ignoreStatus && typeof errorKey === 'string') {
